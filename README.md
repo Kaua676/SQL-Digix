@@ -1,19 +1,19 @@
 # SQL-Digix
 
 ## Aula 1 - 27/01/2025
-CREATE
-SELECT
-ALTER
-DROP
-
-INSERT
-UPDATE
-DELETE
-SELECT
-
-INNER JOIN
-RIGHT JOIN
-LEFT JOIN
+CREATE<br/>
+SELECT<br/>
+ALTER<br/>
+DROP<br/>
+<br/>
+INSERT<br/>
+UPDATE<br/>
+DELETE<br/>
+SELECT<br/>
+<br/>
+INNER JOIN<br/>
+RIGHT JOIN<br/>
+LEFT JOIN<br/>
 
 ## Aula 2 - 31/01/2025
 Imprimir somente o nome da coluna da tabela cargo
