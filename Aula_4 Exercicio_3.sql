@@ -213,7 +213,7 @@ SELECT * FROM aula4.horario;
 -- Consultas
 
 -- 1. Retornar a média dos salários dos funcionários.
-SELECT avg(salario) 
+SELECT avg(salario)
 FROM aula4.funcionario;
 
 -- 2. Listar os funcionários e suas funções, incluindo aqueles sem função definida.
@@ -283,12 +283,10 @@ FROM aula4.funcionario f)
 ORDER BY nome;
 
 -- 12. Exibir todas as funções diferentes que os funcionários exercem e a quantidade de funcionários em cada uma.
-SELECT fun.nome AS funcao, COUNT(f.idfuncionario) AS quantidade_funcionarios
-FROM aula4.funcao fun
-JOIN aula4.horario_trabalho_funcionario ht ON ht.funcao_idfuncao = fun.idfuncao
-JOIN aula4.funcionario f ON f.idfuncionario = ht.funcionario_idfuncionario
-GROUP BY fun.idfuncao
-ORDER BY fun.nome;
+SELECT funcao.nome AS funcao, COUNT(f.idfuncionario) AS total_funcionarios
+FROM aula4.funcionario f
+JOIN aula4.funcao on f.idfuncionario = funcao.idfuncao
+GROUP BY funcao.nome; -- Group By é usado para agrupar linhas com base em uma ou mais colunas
 
 -- 13. Encontrar os filmes que foram exibidos em salas com capacidade superior à média de todas as salas.
 SELECT f.nomeBR
@@ -297,13 +295,19 @@ JOIN aula4.filme_exibido_sala fes ON f.idfilme = fes.filme_idfilme
 JOIN aula4.sala s ON fes.sala_idsala = s.idsala
 WHERE s.capacidade > (SELECT AVG(capacidade) FROM aula4.sala);
 
+SELECT f.nomeBR, s.nome as sala, s.capacidade
+FROM aula4.filme_exibido_sala fs
+JOIN aula4.sala s ON fs.sala_idsala = s.idsala
+JOIN aula4.filme f on fs.filme_idfilme = f.idfilme
+WHERE s.capacidade > (SELECT AVG (capacidade) from aula4.sala);
+
 -- 14. Calcular o salário anual dos funcionários (considerando 12 meses).
 SELECT f.nome, f.salario * 12 AS salario_anual
 FROM aula4.funcionario f;
 
 -- 15. Exibir a relação entre a capacidade da sala e o número total de filmes exibidos nela
-SELECT s.idsala, s.capacidade, COUNT(fes.filme_idfilme) AS filmes_exibidos
+SELECT s.nome as sala, s.capacidade, COUNT(fs.filme_idfilme) AS total_filmes,(COUNT(fs.filme_idfilme)/nullif(s.capacidade, 0)) as filmes_por_assento
 FROM aula4.sala s
-JOIN aula4.filme_exibido_sala fes ON s.idsala = fes.sala_idsala
-GROUP BY s.idsala, s.capacidade
-ORDER BY s.idsala;
+LEFT JOIN aula4.filme_exibido_sala fs ON s.idsala = fs.sala_idsala
+GROUP BY s.idsala, s.capacidade;
+
