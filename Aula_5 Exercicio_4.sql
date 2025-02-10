@@ -159,13 +159,24 @@ HAVING COUNT(case when c.presente = true then 1 end) = (SELECT COUNT(*) from aul
 
 --- 8️. Listar os alunos que estão matriculados em mais de uma turma
 --(Usa HAVING COUNT() > 1️ para encontrar alunos matriculados em mais de uma turma.)
-
+SELECT a.nome as ALUNO, t.idturma as TURMA
+FROM aula5.aluno a
+JOIN aula5.chamada c ON a.codmatricula = c.codmatricula
+JOIN aula5.turma t ON c.idturma = t.idturma
+GROUP BY a.codmatricula, t.idturma
+HAVING COUNT(t.idturma) > 1;
 
 --- 9️. Encontrar as turmas que possuem a maior quantidade de alunos
 -- (Usa ORDER BY e LIMIT para exibir apenas as turmas com mais alunos.)
-
+SELECT t.nome as TURMA, COUNT(a.codmatricula) as QTD_ALUNOS
+FROM aula5.turma t
+JOIN aula5.aluno a ON t.idturma = a.idturma
+GROUP BY t.idturma
+ORDER BY QTD_ALUNOS DESC
+LIMIT 1;
 
 --- 10. Listar os alunos que não compareceram a nenhuma aula
 -- (Usa NOT IN para encontrar alunos sem registros na tabela chamada.)
+
 
 
