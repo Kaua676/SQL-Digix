@@ -179,4 +179,3 @@ LIMIT 1;
 -- (Usa NOT IN para encontrar alunos sem registros na tabela chamada.)
 
 
-
