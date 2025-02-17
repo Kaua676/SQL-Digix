@@ -71,7 +71,7 @@ SELECT * FROM aula8.Projeto;
 SELECT * FROM aula8.Dependente;
 SELECT * FROM aula8.Trabalha_Em;
 
--- 1. Função que retorna o salário de um empregado dado o CPF
+------- 1. Função que retorna o salário de um empregado dado o CPF
 CREATE OR REPLACE FUNCTION obter_salario(p_cpf integer) RETURNS FLOAT AS $$
 DECLARE
     v_salario FLOAT;
@@ -81,10 +81,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Chamada
-SELECT * FROM obter_salario(789);
-
--- 2. Função que retorna o nome do departamento de um empregado dado o CPF
+------- 2. Função que retorna o nome do departamento de um empregado dado o CPF
 CREATE OR REPLACE FUNCTION obter_departamento(p_cpf integer) RETURNS VARCHAR(50) AS $$
 DECLARE
     v_departamento VARCHAR(50);
@@ -94,10 +91,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Chamada
-SELECT * FROM obter_departamento(789);
-
--- 3. Função que retorna o nome do gerente de um departamento dado o NumDep
+------- 3. Função que retorna o nome do gerente de um departamento dado o NumDep
 CREATE OR REPLACE FUNCTION obter_gerente(p_numdep integer) RETURNS VARCHAR(50) AS $$
 DECLARE
     v_gerente VARCHAR(50);
@@ -107,29 +101,91 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Chamada
-SELECT * FROM obter_gerente(2);
-
--- 4. Função que retorna o nome do projeto de um empregado dado o CPF
+------- 4. Função que retorna o nome do projeto de um empregado dado o CPF
 CREATE OR REPLACE FUNCTION obter_projeto(p_cpf integer) RETURNS VARCHAR(50) AS $$
 DECLARE
     v_projeto VARCHAR(50);
 BEGIN
-    SELECT aula8.Projeto.NomeProj INTO v_projeto FROM aula8.Empregado, aula8.Projeto WHERE aula8.Empregado.NumDep = aula8.Projeto.NumDep AND aula8.Empregado.CPF = p_cpf;
+    SELECT p.NomeProj 
+    INTO v_projeto 
+    FROM aula8.Trabalha_Em te
+    JOIN aula8.Projeto p ON te.NumProj = p.NumProj
+    WHERE te.CPF = p_cpf;
+    
     RETURN v_projeto;
 END;
 $$ LANGUAGE plpgsql;
 
--- Chamada
-SELECT * FROM obter_projeto(789);
-
--- 5. Função que retorna o nome do dependente de um empregado dado o CPF
+------- 5. Função que retorna o nome do dependente de um empregado dado o CPF
 CREATE OR REPLACE FUNCTION obter_dependente(p_cpf integer) RETURNS VARCHAR(50) AS $$
 DECLARE
+    v_dependente VARCHAR(50);
+BEGIN
+    SELECT d.NomeDep 
+    INTO v_dependente 
+    FROM aula8.Dependente d
+    WHERE d.CPFE = p_cpf;
     
+    RETURN v_dependente;
+END;
+$$ LANGUAGE plpgsql;
 
--- 6. Função que retorna o nome do gerente de um empregado dado o CPF
+------- 6. Função que retorna o nome do gerente de um empregado dado o CPF
+CREATE OR REPLACE FUNCTION obter_gerente2(p_cpf integer) RETURNS VARCHAR(50) AS $$
+DECLARE
+    v_gerente VARCHAR(50);
+BEGIN
+    SELECT e2.Nome 
+    INTO v_gerente 
+    FROM aula8.Empregado e
+    JOIN aula8.Departamento d ON e.NumDep = d.NumDep
+    JOIN aula8.Empregado e2 ON d.CPFGer = e2.CPF
+    WHERE e.CPF = p_cpf;
+    
+    RETURN v_gerente;
+END;
+$$ LANGUAGE plpgsql;
 
--- 7. Função que retorna a quantidade de horas que um empregado trabalha em um projeto dado o CPF
+------- 7. Função que retorna a quantidade de horas que um empregado trabalha em um projeto dado o CPF
+CREATE OR REPLACE FUNCTION obter_horas_trabalhadas(p_cpf integer) RETURNS INT AS $$
+DECLARE
+    v_horas INT;
+BEGIN
+    SELECT HorasSemana 
+    INTO v_horas 
+    FROM aula8.Trabalha_Em
+    WHERE CPF = p_cpf;
+    
+    RETURN v_horas;
+END;
+$$ LANGUAGE plpgsql;
 
--- 8. Função com Exception que retorna o salário de um empregado dado o CPF
+------- 8. Função com Exception que retorna o salário de um empregado dado o CPF
+CREATE OR REPLACE FUNCTION obter_salario_excecao(p_cpf integer) RETURNS FLOAT AS $$
+DECLARE
+    v_salario FLOAT;
+BEGIN
+    SELECT salario INTO v_salario FROM aula8.Empregado WHERE CPF = p_cpf;
+    
+    IF v_salario IS NULL THEN
+        RAISE EXCEPTION 'CPF não encontrado';
+    END IF;
+    
+    RETURN v_salario;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RAISE EXCEPTION 'Nenhum funcionário encontrado com o CPF %', p_cpf;
+    WHEN OTHERS THEN
+        RAISE EXCEPTION 'Erro desconhecido';
+END;
+$$ LANGUAGE plpgsql;
+
+------- Chamadas
+SELECT obter_salario(123);
+SELECT obter_departamento(123);
+SELECT obter_gerente(1);
+SELECT obter_projeto(123);
+SELECT obter_dependente(123);
+SELECT obter_gerente2(123);
+SELECT obter_horas_trabalhadas(123);
+SELECT obter_salario_excecao(123);
