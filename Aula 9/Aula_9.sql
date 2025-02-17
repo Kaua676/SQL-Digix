@@ -58,3 +58,13 @@ CALL update_time(50, 'Vapo');
 
 -- Excluindo procedure
 DROP PROCEDURE update_time;
+
+-- Faça uma procedure de excluir partida com exceção caso não encontre a partida
+CREATE OR REPLACE PROCEDURE excluir_partida(id_p INTEGER) AS $$
+BEGIN
+    DELETE FROM partida WHERE id = id_p;
+    IF NOT FOUND id THEN
+        RAISE EXCEPTION 'Partida nao encontrada';
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
