@@ -165,18 +165,15 @@ CREATE OR REPLACE FUNCTION obter_salario_excecao(p_cpf integer) RETURNS FLOAT AS
 DECLARE
     v_salario FLOAT;
 BEGIN
-    SELECT salario INTO v_salario FROM aula8.Empregado WHERE CPF = p_cpf;
-    
-    IF v_salario IS NULL THEN
-        RAISE EXCEPTION 'CPF não encontrado';
-    END IF;
-    
+    BEGIN
+        SELECT salario INTO v_salario FROM aula8.Empregado WHERE CPF = p_cpf;
+
+    EXCEPTION
+        WHEN OTHERS THEN
+            RAISE EXCEPTION 'Erro desconhecido: %', SQLERRM;
+    END;
+
     RETURN v_salario;
-EXCEPTION
-    WHEN NO_DATA_FOUND THEN
-        RAISE EXCEPTION 'Nenhum funcionário encontrado com o CPF %', p_cpf;
-    WHEN OTHERS THEN
-        RAISE EXCEPTION 'Erro desconhecido';
 END;
 $$ LANGUAGE plpgsql;
 
@@ -188,4 +185,4 @@ SELECT obter_projeto(123);
 SELECT obter_dependente(123);
 SELECT obter_gerente2(123);
 SELECT obter_horas_trabalhadas(123);
-SELECT obter_salario_excecao(123);
+SELECT obter_salario_excecao(837);
