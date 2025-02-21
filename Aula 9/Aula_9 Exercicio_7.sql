@@ -111,7 +111,66 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- 7. Crie uma procedure chamada Diagnostico_Maquina que faz uma avaliação completa de uma maquina e sugere um upgrade se os recursos dela nao forem suficientes para rodar os softwares instalados.
+create or Replace Procedure Diagnostico_Maquina(Id_Maquina1 integer) as $$
+declare 
+    Total_Ram_Requerida integer;
+    Total_HardDisk_Requerido integer;
+    Ram_Ataul integer;
+    HardDisk_Ataul integer;
+    Ram_Upgrade integer;
+    HardDisk_Upgrade integer;
+begin
+    -- Obetr a soma dos requisitos minimos dos sofwares instalados na maquina
+    select 
+        coalesce(sum(Memoria_Ram), 0) 
+        coalesce(sum(HardDisk), 0) 
+    into
+        Total_Ram_Requerida,
+        Total_HardDisk_Requerido
+    from
+        Software
+    where
+        Fk_Maquina = Id_Maquina1;
+    
+    -- Obter a quantidade de ram e harddisk atuais
+    select 
+        Memoria_Ram,
+        HardDisk 
+    into
+        Ram_Ataul,
+        HardDisk_Ataul
+    from
+        Maquina
+    where
+        Id_Maquina = Id_Maquina1;
 
+    --  Se a maquina não for encontrada, lançar um erro
+    if not found then
+        raise notice 'Maquina não encontrada';
+    end if;
+
+    -- Verficar se a maquina tem recursos suficientes
+    if Ram_Ataul >= Total_HardDisk_Requerido and HardDisk_Ataul >= Total_HardDisk_Requerido then
+        raise notice 'Maquina % tem recursos suficientes e não precisa de upgrade', Id_Maquina1;
+    else
+        -- Calcula a nescessidade do upgrade
+        Ram_Upgrade := Greatest(0, Total_Ram_Requerida - Ram_Ataul); -- ele ta retornando o maior valor
+        HardDisk_Upgrade := Greatest(0, Total_HardDisk_Requerido - HardDisk_Ataul);  -- esse 0 é para não retornar valores negativos
+
+        raise notice 'Maquna % precisa de upgrade', Id_Maquina1;
+
+        -- Sugere upgrade de Ram, se nescessario
+        if Ram_Upgrade > 0 then
+            raise notice 'Sugere upgrade de % GB de Ram', Ram_Upgrade;
+        end if;
+
+        -- Sugere upgrade de HardDisk, se nescessario
+        if HardDisk_Upgrade > 0 then
+            raise notice 'Sugere upgrade de % GB de HardDisk', HardDisk_Upgrade;
+        end if;
+    end if;
+end;
+$$ language plpgsql;
 
 
 -- Chamada 1: Verificar se há espaço suficiente para o software
